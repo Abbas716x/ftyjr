@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="theme-color" content="#05050f">
+<title>716QX NEXUS 6.5</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@400;500;700;800;900&family=JetBrains+Mono:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<!-- ============ 3D SPACE BACKGROUND ============ -->
+<canvas id="scene-bg"></canvas>
+<div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+</div>
+<div class="bg-grid-3d"></div>
+<div class="bg-scan"></div>
+<div class="bg-vignette"></div>
+
+<!-- ============ TOAST ============ -->
+<div id="toast-wrap"></div>
+
+<!-- ============ HEADER ============ -->
+<header class="app-header">
+    <div class="header-inner">
+        <div class="flex items-center gap-3">
+            <button class="hamburger" onclick="openDrawer()" aria-label="menu">
+                <span></span><span></span><span></span>
+            </button>
+            <div>
+                <h1 class="brand-logo">716QX<span style="color:#00FFFF">.</span></h1>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="pulse-dot" style="background:#00FF88;color:#00FF88"></span>
+                    <span id="live-clock" class="clock-text">--:--:--</span>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary btn-compact" onclick="openAddTableModal()">
+            <span style="font-size:20px;font-weight:900;line-height:1">+</span>
+            <span class="hide-xs">طاولة جديدة</span>
+        </button>
+    </div>
+    <div class="header-bar"></div>
+</header>
+
+<!-- ============ DRAWER ============ -->
+<div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+<aside id="drawer" class="drawer">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <div class="brand-badge">R</div>
+            <div>
+                <h2 class="brand-title">716QX</h2>
+                <span class="brand-sub">NEXUS 6.5</span>
+            </div>
+        </div>
+        <button onclick="closeDrawer()" class="close-btn">✕</button>
+    </div>
+
+    <nav class="flex flex-col gap-2 flex-1">
+        <button class="nav-item active" data-view="dashboard" onclick="switchView('dashboard')">
+            <span class="nav-icon">🏠</span><span class="flex-1 text-right">الرئيسية</span>
+        </button>
+        <button class="nav-item" data-view="tables" onclick="switchView('tables')">
+            <span class="nav-icon">🎮</span><span class="flex-1 text-right">الصالات والطاولات</span>
+        </button>
+        <button class="nav-item" data-view="menu" onclick="switchView('menu')">
+            <span class="nav-icon">📋</span><span class="flex-1 text-right">المنيو والأقسام</span>
+        </button>
+        <button class="nav-item" data-view="invoices" onclick="switchView('invoices')">
+            <span class="nav-icon">🧾</span><span class="flex-1 text-right">الفواتير</span>
+        </button>
+        <button class="nav-item" data-view="debts" onclick="switchView('debts')">
+            <span class="nav-icon">📒</span><span class="flex-1 text-right">الديون</span>
+        </button>
+    </nav>
+
+    <div class="drawer-footer">
+        <button class="btn btn-danger w-full" onclick="if(confirm('إعادة ضبط المصنع وحذف كل السجلات؟')) resetAll()">
+            ⚠ إعادة ضبط المصنع
+        </button>
+    </div>
+</aside>
+
+<!-- ============ MAIN ============ -->
+<main class="app-main">
+
+    <!-- ========== DASHBOARD ========== -->
+    <section id="view-dashboard" class="view active">
+        <div class="page-head">
+            <span class="stat-tag" style="color:#00FFFF;border-color:#00FFFF">◆ MODULE.01</span>
+            <h2 class="page-title">مركز التحكم</h2>
+            <p class="page-sub">نظرة شاملة على الإيرادات والجلسات</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+            <div class="stat-card stat-emerald">
+                <span class="stat-tag">SALES.TODAY</span>
+                <div class="stat-num" id="stat-daily">0</div>
+                <div class="flex items-center justify-between mt-3">
+                    <span class="stat-unit">IQD</span>
+                    <span class="stat-unit" style="color:#00FF88">● LIVE</span>
+                </div>
+            </div>
+            <div class="stat-card stat-cyan">
+                <span class="stat-tag">SALES.YESTERDAY</span>
+                <div class="stat-num" id="stat-yesterday">0</div>
+                <div class="flex items-center justify-between mt-3">
+                    <span class="stat-unit">IQD</span><span class="stat-unit">ARCHIVED</span>
+                </div>
+            </div>
+            <div class="stat-card stat-violet">
+                <span class="stat-tag">REVENUE.MONTH</span>
+                <div class="stat-num" id="stat-monthly">0</div>
+                <div class="flex items-center justify-between mt-3">
+                    <span class="stat-unit">IQD</span><span class="stat-unit">CUMULATIVE</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button class="btn btn-success" onclick="transferDaily()">⟳ ترحيل اليوم ← الأمس + الشهر</button>
+            <button class="btn btn-ghost" onclick="if(confirm('تصفير الإيراد الشهري؟')) resetMonthly()">⌬ تصفير الشهر</button>
+            <button class="btn btn-ghost" onclick="if(confirm('تصفير إيراد اليوم؟')) resetDaily()">↻ تصفير اليوم</button>
+        </div>
+
+        <h3 class="section-title">وصول سريع</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="quick-card" style="color:#00FF88" onclick="switchView('tables')">
+                <div class="quick-ico">🎮</div>
+                <div class="flex-1"><h4 class="font-black text-white text-base">الصالات</h4><p class="text-gray-400 text-xs mt-0.5">الطاولات النشطة</p></div>
+            </div>
+            <div class="quick-card" style="color:#00FFFF" onclick="switchView('menu')">
+                <div class="quick-ico">📋</div>
+                <div class="flex-1"><h4 class="font-black text-white text-base">المنيو</h4><p class="text-gray-400 text-xs mt-0.5">الأقسام والأصناف</p></div>
+            </div>
+            <div class="quick-card" style="color:#FF0080" onclick="switchView('debts')">
+                <div class="quick-ico">📒</div>
+                <div class="flex-1"><h4 class="font-black text-white text-base">الديون</h4><p class="text-gray-400 text-xs mt-0.5">الحسابات الآجلة</p></div>
+            </div>
+            <div class="quick-card" style="color:#C026D3" onclick="switchView('invoices')">
+                <div class="quick-ico">🧾</div>
+                <div class="flex-1"><h4 class="font-black text-white text-base">الفواتير</h4><p class="text-gray-400 text-xs mt-0.5">الأرشيف</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== TABLES ========== -->
+    <section id="view-tables" class="view">
+        <div class="page-head-row">
+            <div>
+                <span class="stat-tag" style="color:#00FF88;border-color:#00FF88">◆ MODULE.02</span>
+                <h2 class="page-title">الصالات والطاولات</h2>
+                <p class="page-sub">اضغط على الطاولة لإدارتها</p>
+            </div>
+            <input type="text" class="inp search-inp" id="search-tables" placeholder="⌕ ابحث..." oninput="renderTables()">
+        </div>
+        <div id="tables-grid" class="tables-grid"></div>
+    </section>
+
+    <!-- ========== TABLE DETAIL ========== -->
+    <section id="view-table-detail" class="view">
+        <button class="back-btn mb-5" onclick="switchView('tables')">
+            <span style="font-size:18px">→</span> رجوع للطاولات
+        </button>
+
+        <div class="detail-header">
+            <div>
+                <span class="stat-tag" style="color:#00FF88;border-color:#00FF88">◆ SESSION</span>
+                <h2 id="detail-table-name" class="detail-title">—</h2>
+                <p id="detail-table-customer" class="detail-sub">GUEST</p>
+            </div>
+            <button class="btn btn-primary" onclick="openProductPicker()">
+                <span style="font-size:20px;font-weight:900;line-height:1">+</span> إضافة منتج
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div class="lg:col-span-2">
+                <h4 class="section-label"><span style="color:#00FFFF">▸</span> الطلبات</h4>
+                <div id="detail-items" class="detail-items-scroll"></div>
+            </div>
+            <div class="space-y-4">
+                <div class="glass p-5">
+                    <label class="lbl">اسم الزبون</label>
+                    <input type="text" class="inp mb-4" id="detail-customer-input" onchange="updateTableCustomer(this.value)" placeholder="زبون عام">
+                    <label class="lbl">خصم مباشر (IQD)</label>
+                    <input type="number" class="inp font-mono" id="detail-discount-input" oninput="updateTableDiscount(this.value)" placeholder="0" min="0">
+                </div>
+                <div class="balance-panel">
+                    <div class="space-y-3 mb-4" style="position:relative;z-index:1">
+                        <div class="flex justify-between text-xs"><span class="text-gray-300">الإجمالي:</span><span id="d-sum-sub" class="font-mono font-bold text-white">0 IQD</span></div>
+                        <div class="flex justify-between text-xs"><span style="color:#00FF88">مدفوع مسبقاً:</span><span id="d-sum-early" class="font-mono font-bold" style="color:#00FF88">0 IQD</span></div>
+                        <div class="flex justify-between text-xs"><span style="color:#FF0080">خصم:</span><span id="d-sum-disc" class="font-mono font-bold" style="color:#FF0080">0 IQD</span></div>
+                    </div>
+                    <div class="divider-line"></div>
+                    <div class="flex justify-between items-center" style="position:relative;z-index:1">
+                        <span class="font-black text-white">المطلوب:</span>
+                        <div>
+                            <span id="d-sum-final" class="final-num">0</span>
+                            <span class="text-[10px] font-mono mr-1" style="color:#6b6b80">IQD</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-success w-full" style="padding:16px;font-size:15px" onclick="openCheckout()">✓ إغلاق الحساب</button>
+                <button class="btn btn-ghost w-full" onclick="openTransfer()">⇄ نقل / دمج طاولة</button>
+                <button class="btn btn-ghost w-full" style="color:#FF0080;border-color:rgba(255,0,128,.4)" onclick="if(confirm('إلغاء الطاولة وحذفها؟')) deleteCurrentTable()">🗑 إلغاء الطاولة</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== MENU ========== -->
+    <section id="view-menu" class="view">
+        <div class="page-head-row">
+            <div>
+                <span class="stat-tag" style="color:#C026D3;border-color:#C026D3">◆ MODULE.03</span>
+                <h2 class="page-title">المنيو والأقسام</h2>
+                <p class="page-sub">إدارة الأقسام والأصناف والأسعار</p>
+            </div>
+            <div class="flex gap-2 flex-wrap">
+                <button class="btn btn-ghost" onclick="openAddCategoryModal()">📁 قسم جديد</button>
+                <button class="btn btn-primary" onclick="openAddProductModal()">+ صنف جديد</button>
+            </div>
+        </div>
+        <div id="menu-container" class="space-y-5"></div>
+    </section>
+
+    <!-- ========== DEBTS ========== -->
+    <section id="view-debts" class="view">
+        <div class="page-head-row">
+            <div>
+                <span class="stat-tag" style="color:#FF0080;border-color:#FF0080">◆ MODULE.04</span>
+                <h2 class="page-title">الديون</h2>
+                <p class="page-sub">الحسابات الآجلة والتسديد</p>
+            </div>
+            <input type="text" class="inp search-inp" id="search-debts" placeholder="⌕ ابحث بالاسم..." oninput="renderDebts()">
+        </div>
+        <div id="debts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- ========== INVOICES ========== -->
+    <section id="view-invoices" class="view">
+        <div class="page-head-row">
+            <div>
+                <span class="stat-tag" style="color:#C026D3;border-color:#C026D3">◆ MODULE.05</span>
+                <h2 class="page-title">الفواتير</h2>
+                <p class="page-sub">اضغط على أي فاتورة لعرض محتوياتها الكاملة</p>
+            </div>
+            <div class="flex gap-2 flex-wrap">
+                <input type="text" class="inp search-inp" id="search-invoices" placeholder="⌕ بحث..." oninput="renderInvoices()">
+                <button class="btn btn-ghost" onclick="exportCSV()">📊 تصدير</button>
+                <button class="btn btn-danger" onclick="if(confirm('مسح الأرشيف؟')) clearInvoices()">🗑 مسح</button>
+            </div>
+        </div>
+        <div id="invoices-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+</main>
+
+<!-- ============ MODAL: ADD TABLE ============ -->
+<div class="modal-bd" id="modal-add-table">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal('modal-add-table')">✕</button>
+        <div class="mb-5">
+            <span class="badge badge-live">◆ NEW.SESSION</span>
+            <h3 class="modal-title">فتح طاولة جديدة</h3>
+            <p class="modal-sub">أدخل اسماً للطاولة لبدء الجلسة</p>
+        </div>
+        <label class="lbl">اسم الطاولة</label>
+        <input type="text" class="inp mb-3" id="new-table-name" placeholder="مثال: جهاز 5 VIP">
+        <div class="flex flex-wrap gap-2 mb-5">
+            <button class="btn btn-ghost btn-mini" onclick="suggestTable('جهاز PS5 ')">🎮 جهاز</button>
+            <button class="btn btn-ghost btn-mini" onclick="suggestTable('غرفة VIP #')">👑 VIP</button>
+            <button class="btn btn-ghost btn-mini" onclick="suggestTable('طاولة كافيه ')">☕ كافيه</button>
+        </div>
+        <button class="btn btn-primary w-full" style="padding:15px" onclick="confirmAddTable()">✓ تأكيد الفتح</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: PRODUCT PICKER ============ -->
+<div class="modal-bd" id="modal-picker">
+    <div class="modal-box modal-lg">
+        <button class="modal-close" onclick="closeModal('modal-picker')">✕</button>
+        <div class="modal-head">
+            <button id="picker-back" class="btn btn-ghost hidden btn-mini" onclick="pickerBack()">← الأقسام</button>
+            <div>
+                <span class="badge badge-live">◆ ADD.ITEM</span>
+                <h3 id="picker-title" class="modal-title">اختر القسم</h3>
+                <p id="picker-subtitle" class="modal-sub">اضغط على القسم لعرض الأصناف</p>
+            </div>
+        </div>
+        <div id="picker-body" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+    </div>
+</div>
+
+<!-- ============ MODAL: EARLY PAY ============ -->
+<div class="modal-bd" id="modal-early">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal('modal-early')">✕</button>
+        <div class="text-center mb-5">
+            <div style="font-size:44px;margin-bottom:8px">⚡</div>
+            <h3 class="modal-title">دفع مبكر</h3>
+            <p id="early-name" class="modal-sub font-mono" style="color:#00FF88">—</p>
+        </div>
+        <div class="balance-panel mb-5">
+            <div class="flex justify-between text-sm py-1.5"><span class="text-gray-300">الإجمالي:</span><span id="early-total" class="font-mono font-bold text-white">0</span></div>
+            <div class="flex justify-between text-sm py-1.5"><span style="color:#00FF88">مدفوع:</span><span id="early-paid" class="font-mono font-bold" style="color:#00FF88">0</span></div>
+            <div class="flex justify-between text-sm py-1.5"><span style="color:#00FFFF" class="font-bold">المتبقي:</span><span id="early-remain" class="font-mono font-bold" style="color:#00FFFF">0</span></div>
+        </div>
+        <div class="flex gap-2 mb-4">
+            <button class="btn btn-ghost flex-1 btn-mini" onclick="quickPayOne()">قطعة واحدة</button>
+            <button class="btn btn-ghost flex-1 btn-mini" onclick="quickPayAll()">الكل</button>
+        </div>
+        <label class="lbl">المبلغ المدفوع الآن (IQD)</label>
+        <input type="number" class="inp font-mono mb-5" id="early-amount" min="1">
+        <button class="btn btn-success w-full" style="padding:15px" onclick="confirmEarly()">✓ تأكيد الدفع</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: CHECKOUT ============ -->
+<div class="modal-bd" id="modal-checkout">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal('modal-checkout')">✕</button>
+        <div class="mb-5">
+            <span class="badge badge-live">◆ CHECKOUT</span>
+            <h3 class="modal-title">إغلاق الحساب</h3>
+        </div>
+        <div class="balance-panel mb-5">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-200 text-sm font-bold">المطلوب دفعه:</span>
+                <span id="co-total" class="font-mono font-black" style="color:#00FFFF;font-size:22px;text-shadow:0 0 20px #00FFFF">0 IQD</span>
+            </div>
+        </div>
+        <label class="lbl">المدفوع كاش الآن (IQD)</label>
+        <input type="number" class="inp font-mono mb-4" id="co-paid" oninput="calcSplit()">
+        <label class="lbl" style="color:#FF0080">المتبقي (سيُسجل كدين)</label>
+        <input type="text" class="inp font-mono mb-5" id="co-debt" readonly style="color:#FF0080;background:rgba(255,0,128,.05)">
+        <button class="btn btn-success w-full" style="padding:15px" onclick="confirmCheckout()">✓ تأكيد الدفع والأرشفة</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: TRANSFER ============ -->
+<div class="modal-bd" id="modal-transfer">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal('modal-transfer')">✕</button>
+        <div class="mb-5">
+            <span class="badge badge-live">◆ TRANSFER</span>
+            <h3 class="modal-title">نقل / دمج</h3>
+        </div>
+        <label class="lbl">الطاولة الهدف</label>
+        <select class="inp mb-5" id="transfer-select"></select>
+        <button class="btn btn-primary w-full" style="padding:15px" onclick="confirmTransfer()">⇄ تأكيد النقل</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: ADD CATEGORY ============ -->
+<div class="modal-bd" id="modal-add-cat">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal('modal-add-cat')">✕</button>
+        <h3 class="modal-title mb-5">قسم جديد</h3>
+        <label class="lbl">اسم القسم</label>
+        <input type="text" class="inp mb-4" id="cat-name" placeholder="مثال: العصائر">
+        <label class="lbl">الأيقونة</label>
+        <input type="text" class="inp mb-5" id="cat-icon" value="📁" maxlength="4">
+        <button class="btn btn-primary w-full" style="padding:15px" onclick="confirmAddCategory()">✓ حفظ</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: ADD PRODUCT ============ -->
+<div class="modal-bd" id="modal-add-prod">
+    <div class="modal-box modal-scroll">
+        <button class="modal-close" onclick="closeModal('modal-add-prod')">✕</button>
+        <h3 class="modal-title mb-5" id="prod-modal-title">صنف جديد</h3>
+        <label class="lbl">القسم</label>
+        <select class="inp mb-4" id="prod-cat"></select>
+        <label class="lbl">اسم الصنف</label>
+        <input type="text" class="inp mb-4" id="prod-name" placeholder="مثال: عصير برتقال">
+        <label class="lbl">نوع الحساب</label>
+        <select class="inp mb-4" id="prod-type" onchange="typeChanged()">
+            <option value="direct">صنف مباشر (مشروب/أكل)</option>
+            <option value="countdown">عداد تنازلي (وقت محدد)</option>
+            <option value="open">عداد تصاعدي (سعر/ساعة)</option>
+        </select>
+        <div id="prod-duration-wrap" class="hidden mb-4">
+            <label class="lbl" style="color:#00FFFF">المدة بالدقائق</label>
+            <input type="number" class="inp font-mono" id="prod-duration" placeholder="30" min="1">
+        </div>
+        <label class="lbl" id="prod-price-lbl">السعر (IQD)</label>
+        <input type="number" class="inp font-mono mb-4" id="prod-price" placeholder="2000" min="1">
+        <label class="lbl">الأيقونة</label>
+        <input type="text" class="inp mb-5" id="prod-icon" value="📦" maxlength="4">
+        <button class="btn btn-primary w-full" style="padding:15px" onclick="confirmSaveProduct()">✓ حفظ</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: INVOICE DETAIL ============ -->
+<div class="modal-bd" id="modal-invoice">
+    <div class="modal-box modal-lg modal-scroll">
+        <button class="modal-close" onclick="closeModal('modal-invoice')">✕</button>
+        <div class="mb-4">
+            <span class="badge badge-live">◆ INVOICE</span>
+            <h3 class="modal-title">تفاصيل الفاتورة</h3>
+        </div>
+        <div id="invoice-detail-body"></div>
+    </div>
+</div>
+
+<script src="js/background.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
